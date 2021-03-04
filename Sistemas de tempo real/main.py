@@ -94,8 +94,7 @@ def schedule_RTA(tau):
     #Response Time Analysis (RTA) by Audsley
     #Exact schedulability test
     tau.sort()
-    sch = len(tau)
-    for i in range(1, len(tau)):          #Increasing tasks
+    for i in range(len(tau)):          #Increasing tasks
         Ci = tau[i][2]                    #Execution time of i task
         Di = tau[i][0]                    #deadline = period
         Wprev = Ci                        #Previous window
