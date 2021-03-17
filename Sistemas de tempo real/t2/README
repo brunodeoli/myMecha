@@ -1,0 +1,22 @@
+######### EMB5633 - Sistemas de Tempo Real #########
+Implementacao e Analise de Thread Periodica no Linux 
+####################################################
+
+--------------------------------------------------------------------
+
+## BREVES INSTRUCOES PARA UTILIZACAO ##
+
+>> Para compilar:
+make all
+
+>> Para executar:
+make run
+
+>> Para excluir arquivos gerados na compilacao e arquivo executavel:
+make clean
+
+>> Para verificar vazamento de memoria (necessario compilar antes):
+make run valgrind
+
+>> Caso haja vazamento, para analisar vazamentos:
+make run valgrind Debug
