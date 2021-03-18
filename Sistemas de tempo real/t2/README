@@ -12,6 +12,9 @@ make all
 >> Para executar:
 make run
 
+>> Para executar com outros argumentos substitua periodo/prioridade/carga/politica pelos valores desejados:
+sudo taskset -c 0 ./Prog periodo prioridade carga politica
+
 >> Para excluir arquivos gerados na compilacao e arquivo executavel:
 make clean
 
