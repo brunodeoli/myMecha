@@ -9,15 +9,18 @@ Timer::Timer(const unsigned int period, const Function * handler){
   timer.it_interval.tv_usec = 0;      //inicializando timer
   timer.it_value.tv_usec = period;    //inicializando timer
 
+
+  if(timer_create(CLOCK_REALTIME) == -1)
+    std::cout << "Timer::Timer(): Erro em TIMER_CREATE.\n";
+  if(timer_settime(timerid, 0, &timer, NULL) == -1)
+    std::cout << "Timer::Timer(): Erro em TIMER_SETTIME.\n";
   if(sigaction(SIGALRM, &action, nullptr) == -1)
     std::cout << "Timer::Timer(): Erro em SIGACTION.\n";
+  if(sigwait(NULL, SIGALRM) != 0)
+    std::cout << "Timer::Timer(): Erro em SIGACTION.\n";
 
-  if(setitimer(ITIMER_REAL, &timer, nullptr) == -1)
-    std::cout << "Timer::Timer(): Erro em SETITIMER.\n";
 }
 
 void Timer::reset(){
-  std::cout << "Timer::reset(): chamada para reset do timer.\n";
-  if(setitimer(ITIMER_REAL, &timer, nullptr) == -1)
-    std::cout << "Timer::reset(): Erro em SETITIMER.\n";
+
 }
