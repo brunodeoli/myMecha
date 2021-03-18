@@ -1,19 +1,18 @@
+CC_FILES=$(wildcard *.cc)
 FLAGS = -Wall -lrt
-LDFLAGS = -pthread
-
-Prog:
-	g++ -c $(FLAGS) *.cc
-	g++ $(LDFLAGS) *.o -o Prog
+ARGS = 500 1 100000 SCHED_RR
 
 all:
-	make Prog
+	clear
+	g++ $(CC_FILES) -o Prog $(FLAGS)
+
+run:
+	sudo taskset -c 0 ./Prog $(ARGS)
 
 clean:
 	rm -rf *.o || true
 	rm -rf Prog || true
-
-run:
-	./Prog $(ARGS)
+	clear
 
 valgrind:
 	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes ./Prog

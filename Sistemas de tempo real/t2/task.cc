@@ -3,26 +3,38 @@
 /* | inicializando atributos | */
 Timer Task::_timer;
 
-Task::Task(const unsigned int period, const unsigned int priority, const unsigned int load, string sched){
+Task::Task(unsigned int period, unsigned int priority, unsigned long int load){
 	_period = period;
 	_deadline = period;
 	_priority = priority;
-	_load_factor = load;
+	_load = load;
+	_cjobs = 1;
 
 
+	new (&_timer) Timer(_period, (Timer::Function*)deadline);			//cria novo timer para tarefa
 
-	new (&_timer) Timer(_period, (Timer::Function*)exec);			//cria novo timer para tarefa
+	sigemptyset(&_ss);
+	sigaddset(&_ss, SIGALRM);
+
+	this->run();
 }
 
 void Task::run(){
-	while(){
-
+	int signal;
+	while(!sigwait(&_ss, &signal)){
+		std::cout << "Response time for Job " << _cjobs << ": ";
+		this->exec();
+		_cjobs++;
 	}
 }
 
 void Task::exec(){
-	for (int i = 0; i < _load_factor * 1000; i++) {
+	for (int i = 0; i < _load * 1000; i++) {
 		/* do nothing , keep counting */
 	}
+	_timer.printTime();
 }
 
+void Task::deadline(){
+	std::cout << "Missed the deadline for ";
+}
