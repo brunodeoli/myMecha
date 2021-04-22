@@ -40,4 +40,11 @@ void Semaphore::v()
         end_atomic();
 }
 
+void Semaphore::test_verify()
+{
+    db<Synchronizer>(TRC) << "Semaphore::v(this=" << this << ",value=" << _value << ")" << endl;
+
+    //inserir aqui os testes do SRP
+}
+
 __END_SYS
