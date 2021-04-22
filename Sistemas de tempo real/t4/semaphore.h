@@ -16,6 +16,7 @@ public:
 
     void p();
     void v();
+    void test_verify();
 
 private:
     volatile int _value;
