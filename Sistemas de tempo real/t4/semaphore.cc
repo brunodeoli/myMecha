@@ -34,6 +34,7 @@ void Semaphore::v()
     db<Synchronizer>(TRC) << "Semaphore::v(this=" << this << ",value=" << _value << ")" << endl;
 
     begin_atomic();
+    test_verify();
     if(finc(_value) < 0)
         wakeup();  // implicit end_atomic()
     else
@@ -45,6 +46,7 @@ void Semaphore::test_verify()
     db<Synchronizer>(TRC) << "Semaphore::v(this=" << this << ",value=" << _value << ")" << endl;
 
     //inserir aqui os testes do SRP
+    unsigned int aux = _ceiling; 
 }
 
 __END_SYS
