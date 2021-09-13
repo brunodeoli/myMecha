@@ -1,0 +1,8 @@
+import "automatos_sup.cif";
+import "automatos_sup2.cif";
+svgin id "button" event if   botao.Off: botao.pressionado
+                        elif botao.On: botao.pressionado
+                        end;
+
+
+svgin id "putbox" event colocar_caixa.put;

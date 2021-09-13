@@ -1,0 +1,69 @@
+import "automatos.cif";
+svgfile "esteira_svg.svg";
+
+group controller:
+    cont rot = 0.0;
+    equation rot' = if(esteira.Parada): 0.0
+                    elif(esteira.Movimenta): 1.0
+                    else 0.0 end;
+
+    svgout id "rightgear" attr "transform"
+        value fmt ("rotate(%s, 738.21195,567.99666)", 90*rot);
+    svgout id "leftgear" attr "transform"
+        value fmt ("rotate(%s, 63.510167,567.99667)", 90*rot);
+
+    svgout id "button" attr "fill" value if botao.Off: "red" else "green" end;
+    svgout id "onoff" text value if botao.Off: "OFF" else "ON" end;
+    svgout id "sensor" attr "fill" value if sensor.Espera: "black" else "green" end;
+end
+
+automaton caixa:
+    cont pos1 = 0.0;
+
+    location inicio:
+        initial;
+        equation pos1' = 0.0;
+        edge when colocar_caixa.Colocar do pos1 := 0.0 goto mov;
+
+    location mov:
+        equation pos1' = if botao.Off: 0.0 else 1.0 end;
+        edge when pos1>=5.0 goto inicio;
+
+    // tamanho da esteira - tamanho da caixa = movimento
+    // 675px - 75px = 600 px
+    svgout id "box" attr "transform"
+        value fmt("translate(%s,0)", scale(min(caixa.pos1, 600), 0, 5, 0, 600 ));
+    svgout id "box" attr "visibility" value   if mov: "visible" else "hidden" end;
+end
+
+plant colocar_caixa:
+
+    event put;
+    cont t der 1.0;
+
+    location Esperar:
+        initial; marked;
+        edge put goto Colocar;
+
+    location Colocar:
+        edge when t >= 1.0 do t:=0.0 goto Esperar;
+
+end
+
+requirement sensor_controller:
+    disc int contador = 0;
+
+    location Off:
+        initial; marked;
+        edge botao.pressionado goto On;
+        edge esteira.desliga;
+
+    location On:
+        marked;
+        edge botao.pressionado goto Off;
+        edge esteira.liga;
+        edge sensor.rastreio when (caixa.pos1 > 3.50  and caixa.pos1 < 4.25);
+        edge sensor.valida when not (caixa.pos1 > 3.50  and caixa.pos1 < 4.25) do contador := contador+1;
+
+    svgout id "cont" text value fmt("%d", contador);
+end

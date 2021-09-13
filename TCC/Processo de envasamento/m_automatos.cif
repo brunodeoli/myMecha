@@ -1,0 +1,166 @@
+plant automaton botaoEsteira:
+    uncontrollable u_pressE;
+    location E1:
+        initial; marked;
+        edge u_pressE goto E1;
+end
+
+plant automaton botaoRobo:
+    uncontrollable u_pressR;
+    location E1:
+        initial; marked;
+        edge u_pressR goto E1;
+end
+
+plant automaton esteira:
+    controllable c_liga, c_desliga, c_retorna, c_para;
+
+    location E1:
+        initial; marked;
+        edge c_liga goto E2;
+    location E2:
+        edge c_para goto E3;
+        edge c_desliga goto E1;
+    location E3:
+        edge c_retorna goto E2;
+end
+
+plant automaton robo:
+    controllable c_insere;
+    uncontrollable u_volta;
+    location E1:
+        initial; marked;
+        edge c_insere goto E2;
+    location E2:
+        edge u_volta goto E1;
+end
+
+plant automaton tanque:
+    controllable c_enche;
+    uncontrollable u_cheio;
+    location E1:
+        initial; marked;
+        edge c_enche goto E2;
+    location E2:
+        edge u_cheio goto E1;
+end
+
+plant automaton sensNivel:
+    uncontrollable u_OK,u_NOK;
+    location E1:
+        initial; marked;
+        edge u_NOK goto E2;
+    location E2:
+        edge u_OK goto E1;
+end
+
+plant automaton sensPos:
+    uncontrollable u_OK,u_NOK;
+    location E1:
+        initial; marked;
+        edge u_OK goto E2;
+    location E2:
+        edge u_NOK goto E1;
+end
+
+plant automaton envasadora:
+    controllable c_envasa;
+    uncontrollable u_Nenvasa;
+    location E1:
+        initial; marked;
+        edge c_envasa goto E2;
+    location E2:
+        edge u_Nenvasa goto E1;
+end
+
+requirement automaton R1:
+    location E1:
+        initial; marked;
+        edge botaoEsteira.u_pressE goto E2;
+        edge esteira.c_desliga;
+    location E2:
+        marked;
+        edge botaoEsteira.u_pressE goto E1;
+        edge esteira.c_liga;
+end
+
+requirement automaton R2:
+    location E1:
+        initial; marked;
+        edge esteira.c_liga goto E2;
+    location E2:
+        marked;
+        edge esteira.c_desliga goto E1;
+        edge robo.c_insere;
+end
+
+requirement automaton R3:
+    location E1:
+        initial; marked;
+        edge esteira.c_para goto E2;
+        edge robo.c_insere;
+    location E2:
+        marked;
+        edge esteira.c_retorna goto E1;
+end
+
+requirement automaton R4:
+    location E1:
+        initial; marked;
+        edge botaoRobo.u_pressR goto E2;
+    location E2:
+        marked;
+        edge robo.c_insere goto E1;
+        edge botaoRobo.u_pressR;
+end
+
+requirement automaton R5:
+    location E1:
+        initial; marked;
+        edge sensNivel.u_NOK goto E2;
+        edge envasadora.c_envasa;
+    location E2:
+        marked;
+        edge sensNivel.u_OK goto E1;
+        edge tanque.c_enche;
+end
+
+requirement automaton R6:
+    location E1:
+        initial; marked;
+        edge sensPos.u_OK goto E2;
+    location E2:
+        marked;
+        edge sensPos.u_NOK goto E1;
+        edge envasadora.c_envasa;
+        edge esteira.c_para;
+end
+
+requirement automaton R7:
+    location E1:
+        initial; marked;
+        edge esteira.c_para goto E2;
+    location E2:
+        marked;
+        edge envasadora.c_envasa goto E1;
+end
+
+requirement automaton R8:
+    location E1:
+        initial; marked;
+        edge envasadora.u_Nenvasa goto E2;
+    location E2:
+        marked;
+        edge esteira.c_retorna goto E1;
+end
+
+requirement automaton R9:
+    location E1:
+        initial; marked;
+        edge esteira.c_retorna goto E2;
+        edge esteira.c_para;
+        edge sensPos.u_NOK;
+    location E2:
+        marked;
+        edge sensPos.u_NOK goto E1;
+end

@@ -1,0 +1,10 @@
+from "lib:cif3" import *;
+
+cif3sim("c_interativo.cif",
+        "-i svg",
+        "-a first",
+        "--frame-rate=50",
+        "--speed=1",
+        "--stateviz=1",
+        "--solver-root-maxchk=0.01",
+        "--option-dialog=yes");

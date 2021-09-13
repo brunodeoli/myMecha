@@ -1,0 +1,79 @@
+import "esteira.cif";
+
+supervisor automaton sup2:
+  alphabet botao.pressionado, esteira.liga, esteira.desliga, sensor.rastreio, sensor.valida;
+  location s1:
+    initial;
+    marked;
+    edge sensor.rastreio goto s2;
+    edge botao.pressionado goto s3;
+  location s2:
+    edge sensor.valida goto s1;
+    edge botao.pressionado goto s4;
+  location s3:
+    edge sensor.rastreio goto s4;
+    edge esteira.liga goto s5;
+    edge botao.pressionado goto s1;
+  location s4:
+    edge sensor.valida goto s3;
+    edge esteira.liga goto s6;
+    edge botao.pressionado goto s2;
+  location s5:
+    edge sensor.rastreio goto s6;
+    edge botao.pressionado goto s7;
+  location s6:
+    edge sensor.valida goto s5;
+    edge botao.pressionado goto s8;
+  location s7:
+    edge sensor.rastreio goto s8;
+    edge esteira.desliga goto s1;
+    edge botao.pressionado goto s5;
+  location s8:
+    edge sensor.valida goto s7;
+    edge esteira.desliga goto s2;
+    edge botao.pressionado goto s6;
+
+  svgout id "estado" text value switch self:
+        case s1: "s1"
+        case s2: "s2"
+        case s3: "s3"
+        case s4: "s4"
+        case s5: "s5"
+        case s6: "s6"
+        case s7: "s7"
+        case s8: "s8"
+  end file "automato.svg";
+
+  /* svgout id "entrada" text value switch self:
+        case s1: "inicial/pressionado/desliga/valida"
+        case s2: "pressionado/valida"
+        case s3: "pressionado/liga/valida"
+        case s4: "pressionado/rastreio"
+        case s5: "pressionado/rastreio/liga"
+        case s6: "pressionado/valida"
+        case s7: "pressionado/rastreio"
+        case s8: "pressionado/rastreio/desliga"
+    end file "automato.svg"; */
+
+    svgout id "saida" text value switch self:
+        case s1: "pressionado/rastreio"
+        case s2: "pressionado/valida"
+        case s3: "pressionado/rastreio/liga"
+        case s4: "pressionado/valida/liga"
+        case s5: "pressionado/rastreio"
+        case s6: "pressionado/valida"
+        case s7: "pressionado/rastreio/desliga"
+        case s8: "pressionado/valida/desliga"
+    end file "automato.svg";
+end
+
+svgout id "entrada" text value if (botao.On and (not sensor.Ativado) and (not esteira.Parada)): "pressionado"
+            elif (sensor.Ativado and botao.On and esteira.Movimenta): "valida"
+            elif (sensor.Espera and botao.On and esteira.Movimenta): "rastreio"
+            elif (esteira.Movimenta and botao.On): "liga"
+            elif (esteira.Parada and botao.Off): "inicial/desliga"
+            else "inicial"
+            end file "automato.svg";
+
+//svgout id "entrada" text value fmt("%s", "state-init") file "automato.svg";
+//svgout id "entrada" event botao.pressionado text value file "automato.svg";

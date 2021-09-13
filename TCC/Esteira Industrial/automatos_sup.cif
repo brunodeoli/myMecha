@@ -1,0 +1,13 @@
+import "esteira.cif";
+
+supervisor automaton sup:
+  alphabet botao.pressionado, esteira.liga, esteira.desliga;
+  location s1:
+    initial;
+    marked;
+    edge botao.pressionado goto s2;
+  location s2:
+    edge esteira.liga goto s1;
+    edge esteira.desliga goto s1;
+    edge botao.pressionado goto s1;
+end

@@ -1,0 +1,4 @@
+import "m_automatos_sup.cif";
+
+svgin id "botao1" event botaoEsteira.u_pressE file "v_IHM.svg";
+svgin id "botao2" event botaoRobo.u_pressR file "v_IHM.svg";

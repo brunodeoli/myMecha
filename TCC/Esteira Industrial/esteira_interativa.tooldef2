@@ -1,0 +1,10 @@
+from "lib:cif3" import *;
+
+cif3sim(
+    "esteira_interativa.cif",
+    "-i svg",
+    "-a first",
+    "--frame-rate=50",
+    "--option-dialog=yes",
+    //"--solver-root-maxchk=0.01",
+);

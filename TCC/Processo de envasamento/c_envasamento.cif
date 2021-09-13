@@ -1,0 +1,220 @@
+import "m_automatos.cif";
+
+//BOTAO ESTEIRA--------------------------------------------------
+
+svgout id "botao1" attr "width" value
+    if esteira.E1: 40
+    else 20 end file "v_IHM.svg";
+
+//BOTAO ROBO-----------------------------------------------------
+
+svgout id "botao2" attr "width" value
+    if robo.E1: 40
+    else 20 end file "v_IHM.svg";
+
+//ROTACAO DAS ENGRENAGENS----------------------------------------
+
+cont rot = 0.0;
+equation rot' = if(esteira.E1 or esteira.E3): 0.0
+                elif(esteira.E2): 1.0
+                else 0.0 end;
+svgout id "rightgear" attr "transform" value
+    fmt ("rotate(%s,738.21195,567.99667)", 90*rot)
+    file "v_envasamento.svg";
+svgout id "leftgear" attr "transform" value
+    fmt ("rotate(%s, 63.510167,567.99667)", 90*rot)
+    file "v_envasamento.svg";
+
+//MOVIMENTO ROBO-------------------------------------------------
+
+automaton movRobo:
+    cont x = -135;
+    cont y = 180;
+
+    location E1:    //origem
+        initial;marked;
+        equation x' = 0.0;
+        equation y' = 0.0;
+        edge when robo.E2 goto E2;
+    location E2:    //mov pra direita
+        equation x' =  115.0;
+        equation y' =  0.0;
+        edge when x >= -20.0 goto E3;
+    location E3:    //mov pra baixo
+        equation x' =  0.0;
+        equation y' =  20.0;
+        edge when y >= 190.0 goto E4;
+    location E4:    //mov pra cima
+        equation x' = 0.0;
+        equation y' =  -120.0;
+        edge robo.u_volta;
+        edge when y <= 180.0 goto E5;
+    location E5:    //mov pra esquerda
+        equation x' =  -230.0;
+        equation y' = 0.0;
+        edge when x <= -135.0 goto E1;
+end
+
+svgout id "arm" attr "transform"
+        value fmt("translate(%s,%s)", scale(movRobo.x, 0, 115, 0, 115),
+                                      scale(movRobo.y, 0, 180, 0, 190))
+        file "v_envasamento.svg";
+
+//MOVIMENTO GARRAFA----------------------------------------------
+
+automaton garrafa:
+    cont x = -13.92;
+    cont y = 224.19;
+
+    location E1:    //origem
+        initial;marked;
+        equation x' = 0.0;
+        equation y' = 0.0;
+        edge when robo.E2 do x := -13.92, y := 224.19 goto E2;
+    location E2:    //mov pra direita
+        equation x' =  29.22;
+        equation y' =  0.0;
+        edge when x >= 15.3 goto E3;
+    location E3:    //mov pra baixo
+        equation x' =  0.0;
+        equation y' =  4.9;
+        edge when y >= 229.09 goto E4;
+    location E4:    //na esteira
+        equation x' = if(esteira.E1 or esteira.E3): 0.0
+                      elif(esteira.E2): 18.47
+                      else 0.0 end;
+        equation y' =  0.0;
+        edge when x >= 200 goto E1;
+end
+
+svgout id "garrafa" attr "transform"
+        value fmt("matrix(0.05066644,0,0,0.05066644,%s,%s)", garrafa.x, garrafa.y)
+        file "v_envasamento.svg";
+
+//LIQUIDO DA GARRAFA----------------------------------------------
+
+automaton liquidoG:
+    cont h = 0;
+
+    location E1:    //vazia
+        initial;marked;
+        equation h' = 0.0;
+        edge when robo.E2 do h := 0 goto E2;
+    location E2:
+        equation h' = 0.0;
+        edge when envasadora.E2 do h := 0 goto E3;
+    location E3:    //enchendo
+        equation h' =  5.0;
+        edge when h >= 5.0 goto E4;
+    location E4:    //u_cheio
+        equation h' = 0.0;
+        edge envasadora.u_Nenvasa goto E1;
+end
+
+svgout id "liquido" attr "height"
+        value scale(liquidoG.h, 0, 5, 0, 452)
+        file "v_envasamento.svg";
+
+//LIQUIDO DO TANQUE-----------------------------------------------
+
+automaton liquidoT:
+    cont h = 38;
+
+    location E1:    //vazia
+        initial;marked;
+        equation h' = if(envasadora.E2): -19
+                        else 0.0 end;
+        edge sensNivel.u_NOK when h<=38 goto E2;
+        edge sensNivel.u_OK;
+    location E2:    //enchendo
+        equation h' =  50.0;
+        edge tanque.u_cheio when h >= 190.0 goto E1;
+end
+
+svgout id "liquidotank" attr "height"
+        value scale(liquidoT.h, 0, 190, 0, 190)
+        file "v_envasamento.svg";
+
+//DETECCAO DO SENSOR DE NIVEL DO TANQUE---------------------------
+
+svgout id "sensnivel" attr "fill" value
+    if (sensNivel.E1): "lime" else "red" end
+    file "v_envasamento.svg";
+
+//DETECCAO DO SENSOR DE POSICAO PARA ENVASE-----------------------
+
+automaton envasamento:
+    disc int contador = 0;
+
+    location E1:
+        initial; marked;
+        edge when (esteira.E2 or esteira.E3) goto E2;
+        edge sensPos.u_NOK; //acho que isso nao precisa
+    location E2:
+        edge when esteira.E1 goto E1;
+        edge sensPos.u_OK when (garrafa.x > 117.00  and garrafa.x < 117.1) goto E3;
+    location E3:
+        //edge esteira.c_retorna;
+        edge sensPos.u_NOK when not (garrafa.x > 117.00  and garrafa.x < 117.1)
+                         do contador := contador+1 goto E2;
+end
+
+svgout id "sens1" attr "fill" value
+    if sensPos.E1: "black" else "lime" end
+    file "v_envasamento.svg";
+
+//MOVIMENTO ENVASADOR---------------------------------------------
+
+automaton envasador:
+    cont y = 0;
+    cont t der 1.0;
+    location E1:    //origem
+        initial;marked;
+        equation y' = 0.0;
+        edge when sensPos.E2 goto E2;
+    location E2:    //desce e envasa
+        equation y' = 50.0;
+        edge envasadora.c_envasa when y >= 10.0 goto E3;
+    location E3:    //recolhe envasador
+        equation y' = if(envasadora.E2): 0.0 else -25.0 end;
+        edge when envasadora.E1 and y <= 0.0 do t := 0.0 goto E4;
+    location E4:
+        equation y' = 0;
+        edge esteira.c_retorna;
+        edge when t >= 1.0 do y := 0 goto E1;
+end
+
+svgout id "envasador" attr "transform"
+        value fmt("translate(0,%s)", scale(envasador.y, 0, 10, 0, 23))
+        file "v_envasamento.svg";
+
+//MENU OPERACAO IHM------------------------------------------------
+
+svgout id "opesteira" attr "fill" value
+    if esteira.E1: "red"
+    elif esteira.E2: "lime"
+    else "yellow"
+    end file "v_IHM.svg";
+
+svgout id "oprobo" attr "fill" value
+    if robo.E1: "red"
+    else "lime"
+    end file "v_IHM.svg";
+
+svgout id "optanque" attr "fill" value
+    if tanque.E1: "lime"
+    else "red"
+    end file "v_IHM.svg";
+
+svgout id "openvase" attr "fill" value
+    if envasadora.E2: "lime"
+    else "red"
+    end file "v_IHM.svg";
+
+svgout id "contGarrafa" text value
+    fmt("%d", envasamento.contador)
+    file "v_IHM.svg";
+
+svgout id "volTanque" text value
+    fmt("%.1f L", (liquidoT.h/19))
+    file "v_IHM.svg";

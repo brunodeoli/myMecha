@@ -1,0 +1,45 @@
+plant automaton botao:
+
+    uncontrollable pressionado;
+
+    location Off:
+        initial; marked;
+        edge pressionado goto On;
+
+    location On:
+        edge pressionado goto Off;
+end
+
+plant automaton sensor:
+    uncontrollable rastreio, valida;
+
+    location Espera:
+        marked; initial;
+        edge rastreio goto Ativado;
+
+    location Ativado:
+        edge valida goto Espera;
+end
+
+plant automaton esteira:
+    controllable liga, desliga;
+
+    location Parada:
+        initial; marked;
+        edge liga goto Movimenta;
+
+    location Movimenta:
+        edge desliga goto Parada;
+end
+
+requirement BotaoEsteira:
+    location Off:
+        initial; marked;
+        edge botao.pressionado goto On;
+        edge esteira.desliga;
+
+    location On:
+        marked;
+        edge botao.pressionado goto Off;
+        edge esteira.liga;
+end
